@@ -1,0 +1,184 @@
+version: "3.9"
+
+services: 
+  postgres: # Postrges длф MLflow
+    image: postgres:15-alpine
+    container_name: postgres-mlflow
+    environment:
+      POSTGRES_USER: mlflow_user
+      POSTGRES_PASSWORD: mlflow_pass
+      POSTGRES_DB: mlflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - student_net
+
+  minio: # Minio длф MLflow
+    image: minio/minio:latest 
+    environment:
+      MINIO_ROOT_USER: minio_user
+      MINIO_ROOT_PASSWORD: minio_pass
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - student_net
+
+  mlflow: # MLflow
+    build:
+      context: .
+      dockerfile: HW5 - MLFlow/Dockerfile.mlflow
+    depends_on:
+      - postgres
+      - minio
+    ports:
+      - "5050:5000"
+    environment:  
+      MLFLOW_FLASK_SERVER_SECRET_KEY: my-secret-key
+      AWS_ACCESS_KEY_ID: minio_user
+      AWS_SECRET_ACCESS_KEY: minio_pass  
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      MLFLOW_AUTH_CONFIG_PATH: /mlflow_config/basic_auth.ini
+    volumes:
+      - mlruns-data:/data
+    networks:
+      - student_net
+
+  inference_service: # Сервис инференса модели
+    build: ./inference_service
+    container_name: inference-service
+    ports:
+      - "8001:8001"
+    networks:
+      - student_net
+
+  turing-test-service: # Основной сервис
+    build: ./turing_test_service
+    container_name: turing-test-service
+    ports:
+      - "8000:8000"
+    networks:
+      - student_net
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  redis:  # Редис для кэширования
+    image: redis:latest
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - student_net
+
+  minio-ls: # БД для разметки
+    image: minio/minio:latest
+    container_name: minio-server-ls
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    environment:
+      MINIO_ROOT_USER: myuser
+      MINIO_ROOT_PASSWORD: mypassword
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data_ls:/data
+    networks:
+      - student_net
+
+  
+  postgres-ls: # Еще БД для разметки
+    image: postgres:latest
+    container_name: postgres-server-ls
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    volumes:
+      - postgres_data_ls:/var/lib/postgresql/data
+    networks:
+      - student_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+   
+  labelstudio: # Сервис для разметки
+    image: heartexlabs/label-studio:latest
+    container_name: labelstudio
+    command: 
+      - label-studio 
+      - start 
+      - --no-browser
+    environment: 
+      LABEL_STUDIO_DATABASE_HOST: postgres-ls
+      LABEL_STUDIO_DATABASE_PORT: 5432
+      LABEL_STUDIO_DATABASE_NAME: mydb
+      LABEL_STUDIO_DATABASE_USER: myuser
+      LABEL_STUDIO_DATABASE_PASSWORD: mypassword 
+      LABEL_STUDIO_DATABASE_URL: postgresql://myuser:mypassword@postgres:5432/mydb
+    ports:  
+      - "5051:8080"
+    depends_on:
+      - postgres-ls
+    networks:
+      - student_net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    networks:
+      - student_net
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+    networks:
+      - student_net
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - student_net
+
+
+networks:
+  student_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data: 
+  mlruns-data:
+  minio_data_ls:
+  postgres_data_ls: 
+  grafana_data:

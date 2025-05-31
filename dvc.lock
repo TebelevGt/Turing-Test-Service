@@ -1,0 +1,95 @@
+schema: '2.0'
+stages:
+  dataset:
+    cmd: python load-train-eval-champ-model/dataset.py
+    deps:
+    - path: load-train-eval-champ-model/dataset.py
+      hash: md5
+      md5: 522b9679cab1dd04c0bf3bc3daed8cbc
+      size: 1638
+    - path: load-train-eval-champ-model/params.py
+      hash: md5
+      md5: 9769bf2daad82e34ee92ad12cf135c05
+      size: 172
+    outs:
+    - path: data/raw_data
+      hash: md5
+      md5: 8d419cbebc109636b98af580419d9d8e.dir
+      size: 3638445
+      nfiles: 707
+  train_test_split:
+    cmd: python load-train-eval-champ-model/train_test_split.py
+    deps:
+    - path: data/raw_data
+      hash: md5
+      md5: 8d419cbebc109636b98af580419d9d8e.dir
+      size: 3638445
+      nfiles: 707
+    - path: load-train-eval-champ-model/params.py
+      hash: md5
+      md5: 9769bf2daad82e34ee92ad12cf135c05
+      size: 172
+    - path: load-train-eval-champ-model/train_test_split.py
+      hash: md5
+      md5: 91322fe62c068603eed5a194a901e0a4
+      size: 2095
+    outs:
+    - path: data/preprocessed_data/test.csv
+      hash: md5
+      md5: 44094987dc5f0fba8d565c0953edf567
+      size: 71721
+    - path: data/preprocessed_data/train.csv
+      hash: md5
+      md5: 1380891003d32b5d4e8a22e4d08fbac5
+      size: 294493
+  train:
+    cmd: python load-train-eval-champ-model/train.py
+    deps:
+    - path: data/preprocessed_data/train.csv
+      hash: md5
+      md5: 1380891003d32b5d4e8a22e4d08fbac5
+      size: 294493
+    - path: load-train-eval-champ-model/params.py
+      hash: md5
+      md5: 9769bf2daad82e34ee92ad12cf135c05
+      size: 172
+    - path: load-train-eval-champ-model/train.py
+      hash: md5
+      md5: 7f123ecd0fad006bc5c9465e122df598
+      size: 1810
+      isexec: true
+    outs:
+    - path: inference_service/models
+      hash: md5
+      md5: 72c1fb966f10ba909a8830790d0354b4.dir
+      size: 585748
+      nfiles: 5
+  evaluate:
+    cmd: python load-train-eval-champ-model/evaluate.py
+    deps:
+    - path: data/preprocessed_data/test.csv
+      hash: md5
+      md5: 44094987dc5f0fba8d565c0953edf567
+      size: 71721
+    - path: data/preprocessed_data/train.csv
+      hash: md5
+      md5: 1380891003d32b5d4e8a22e4d08fbac5
+      size: 294493
+    - path: inference_service/models
+      hash: md5
+      md5: 72c1fb966f10ba909a8830790d0354b4.dir
+      size: 585748
+      nfiles: 5
+    - path: load-train-eval-champ-model/evaluate.py
+      hash: md5
+      md5: 3f9549d72a8b782755e632a7da09a09e
+      size: 1455
+    - path: load-train-eval-champ-model/params.py
+      hash: md5
+      md5: 9769bf2daad82e34ee92ad12cf135c05
+      size: 172
+    outs:
+    - path: load-train-eval-champ-model/metrics/metrics.json
+      hash: md5
+      md5: 3b3c335dcd0781ba376371bd9f3237a8
+      size: 304

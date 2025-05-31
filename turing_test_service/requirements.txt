@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+numpy 
+dvc  
+pandas
+psycopg2-binary 
+requests
+sqlalchemy 
+scikit-learn  
+catboost    
+moto 
+python-dotenv
+aiohttp
+redis

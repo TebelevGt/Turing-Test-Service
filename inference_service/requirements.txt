@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+mlflow 
+pydantic
+requests
+boto3
+python-dotenv
+catboost
+asyncio

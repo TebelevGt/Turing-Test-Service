@@ -1,0 +1,38 @@
+stages:
+  dataset:
+    cmd: python load-train-eval-champ-model/dataset.py
+    deps:
+      - load-train-eval-champ-model/dataset.py
+      - load-train-eval-champ-model/params.py
+    outs:
+      - /home/georgii-tebelev/g.tebelev/data/raw_data/
+
+  train_test_split:
+    cmd: python load-train-eval-champ-model/train_test_split.py
+    deps:
+      - load-train-eval-champ-model/train_test_split.py
+      - load-train-eval-champ-model/params.py
+      - /home/georgii-tebelev/g.tebelev/data/raw_data/
+    outs:
+      - /home/georgii-tebelev/g.tebelev/data/preprocessed_data/train.csv
+      - /home/georgii-tebelev/g.tebelev/data/preprocessed_data/test.csv
+
+  train:
+    cmd: python load-train-eval-champ-model/train.py
+    deps:
+      - load-train-eval-champ-model/train.py
+      - load-train-eval-champ-model/params.py
+      - /home/georgii-tebelev/g.tebelev/data/preprocessed_data/train.csv
+    outs:
+      - /home/georgii-tebelev/g.tebelev/inference_service/models/
+
+  evaluate:
+    cmd: python load-train-eval-champ-model/evaluate.py
+    deps:
+      - load-train-eval-champ-model/evaluate.py
+      - load-train-eval-champ-model/params.py
+      - /home/georgii-tebelev/g.tebelev/inference_service/models/
+      - /home/georgii-tebelev/g.tebelev/data/preprocessed_data/train.csv
+      - /home/georgii-tebelev/g.tebelev/data/preprocessed_data/test.csv
+    outs:
+      - /home/georgii-tebelev/g.tebelev/load-train-eval-champ-model/metrics/metrics.json

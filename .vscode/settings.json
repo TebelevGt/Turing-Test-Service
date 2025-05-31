@@ -1,0 +1,18 @@
+{
+    // Enable Python linting
+    "python.linting.enabled": true,
+    // Set Ruff as the linter
+    "python.linting.ruffEnabled": true,
+    // Configure Ruff arguments
+    "python.linting.ruffArgs": [
+        "--fix" // Auto-fix linting issues when possible
+    ],
+    // Enable Black as the formatter
+    "python.formatting.provider": "black",
+    // Automatically format code on save
+    "editor.formatOnSave": true,
+    // Organize imports automatically on save
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+}

@@ -1,0 +1,41 @@
+# Service — external API
+apiVersion: v1
+kind: Service
+metadata:
+  name: inference-service
+  namespace: default
+spec:
+  selector:
+    app: inference
+  ports:
+    - port: 33999
+      targetPort: 8001
+  type: LoadBalancer
+---
+# Deployment — two replicas
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inference
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: inference
+  template:
+    metadata:
+      labels:
+        app: inference
+        namespace: default
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: inference
+          image: git.culab.ru:5050/course-projects/production-ml/week-2/g.tebelev:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          env:
+            - name: INFERENCE_SERVICE_PORT_FASTAPI
+              value: "8001"

@@ -1,0 +1,30 @@
+{
+  "version": "0.1.0",
+  "configurations": [
+    {
+      "name": "Run Turing-test service",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "/opt/homebrew/bin/poetry",
+      "python": "/opt/homebrew/Cellar/poetry/2.0.1/libexec/bin/python",
+      "console": "integratedTerminal",
+      "args": [
+        "run",
+        "python",
+        "-m",
+        "uvicorn",
+        "turing_test_service.api.main:app",
+        "--log-config=./config/logging_config.yaml"
+      ],
+    },
+    {
+      "name": "Run Client emulator",
+      "type": "debugpy",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/tools/shooter",
+      "program": "${workspaceFolder}/tools/shooter/main.py",
+      "python": "${workspaceFolder}/tools/shooter/venv/bin/python",
+      "console": "integratedTerminal",
+    }
+  ]
+}

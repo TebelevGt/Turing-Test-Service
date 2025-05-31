@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-aux-namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-service
+  namespace: my-namespace
+spec:
+  selector:
+    app: app1
+  ports:
+    - port: 33888
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  namespace: my-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app2
+  namespace: my-namespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: app2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: busybox
+        image: busybox:latest
+        command: ["sh", "-c", "echo 'Test for kubernetes HW' && sleep 3600"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app3
+  namespace: my-namespace
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: app3
+  template:
+    metadata:
+      labels:
+        app: app3
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1
+  namespace: my-aux-namespace
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80

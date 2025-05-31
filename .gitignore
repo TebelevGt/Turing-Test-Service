@@ -1,0 +1,52 @@
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.eggs
+*.egg-info
+dist
+build
+.tox
+.mypy_cache
+.ruff_cache
+.pytest_cache
+.coverage
+
+# Local configuration
+# .env
+.venv
+env/
+venv/
+ENV/
+include/
+lib/
+local/
+.cache
+__pycache__
+
+# System files
+.DS_Store
+
+# Editor files
+.idea
+*.suo
+*.user
+*.tmp
+*.log
+*.bak
+*.swp
+
+#  poetry files
+.venv
+.poetry/
+poetry.lock
+
+# model
+HW9-LLM/
+/models
+/HW11-Airflow
+secrets.yaml.enc
